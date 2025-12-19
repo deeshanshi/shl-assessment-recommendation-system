@@ -5,3 +5,4 @@ beautifulsoup4
 pandas
 lxml
 python-dotenv
+scikit-learn
