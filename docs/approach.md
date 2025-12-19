@@ -1,90 +1,130 @@
-SHL Assessment Recommendation System – Approach
-1. Problem Understanding
+# SHL Assessment Recommendation System – Approach
 
-Hiring managers often struggle to identify the most relevant assessments for a given role using traditional keyword-based search and filtering. Such approaches fail to capture the semantic intent of job descriptions and often lead to irrelevant or unbalanced assessment recommendations.
+## 1. Problem Understanding
 
-The objective of this project is to build an intelligent recommendation system that accepts a natural language query or job description and returns 5–10 relevant SHL Individual Test Solutions. The system must be accurate, scalable, and capable of balancing technical and behavioral assessments as required by SHL.
+The goal of this project is to build a recommendation system that suggests the most relevant SHL **Individual Test Solutions** for a given recruiter query or job description.
 
-2. Data Collection and Preparation
+Given an input query (natural language job description), the system must:
+- Recommend **up to 10 assessments**
+- Ensure recommendations align with both **technical skills** and **behavioral/personality requirements**
+- Return results in a structured format suitable for automated evaluation
 
-The first step involved building a data ingestion pipeline by scraping the SHL Product Catalog. Only Individual Test Solutions were collected, explicitly excluding pre-packaged job solutions as per the assignment requirements.
+This is a **multi-label recommendation problem**, as each query can map to multiple valid SHL assessments.
 
-For each assessment, the following attributes were extracted and structured:
+---
 
-Assessment name
+## 2. Data Sources
 
-Assessment URL
+### 2.1 SHL Assessment Catalog
+The SHL product catalog was used to construct the assessment dataset.  
+Each assessment contains:
+- Assessment name  
+- Assessment URL  
+- Description  
+- Test type (Knowledge/Skill or Personality/Behavior)  
+- Duration  
+- Remote and adaptive support flags  
 
-Description
+Pre-packaged job solutions were excluded, and only **Individual Test Solutions** were considered.
 
-Test type (Knowledge & Skills / Personality & Behavior)
+### 2.2 Labeled Evaluation Data
+SHL-provided train and test datasets were used:
+- `train.csv` for evaluation
+- `test.csv` for final submission
 
-Duration
+Each query in the train dataset maps to **multiple relevant assessment URLs**, making the task multi-label.
 
-Remote support
+---
 
-Adaptive support
+## 3. Recommendation Approach
 
-The scraped data was cleaned and stored in a CSV format. Special care was taken to handle missing values and ensure robustness. The final dataset contained more than the minimum required number of assessments, making it suitable for downstream retrieval and evaluation.
+### 3.1 Retrieval Method
 
-3. Recommendation Architecture
+Due to system-level constraints on Windows (PyTorch DLL issues), a **TF-IDF based vector retrieval approach** was implemented as a robust and reproducible baseline.
 
-To overcome the limitations of keyword matching, the recommendation system uses a semantic retrieval-based approach.
+The assessment text representation is created by combining:
+- Assessment name  
+- Assessment description  
+- Test type  
 
-The overall pipeline is:
+TF-IDF vectors are computed for all assessments, and cosine similarity is used to retrieve the most relevant candidates for a given query.
 
-User provides a natural language query or job description
+This satisfies the requirement of a **vector-based retrieval system** as specified in the assignment.
 
-The query is processed and tokenized
+---
 
-Assessments are ranked based on relevance using a scoring mechanism
+### 3.2 Domain-Aware Re-ranking (K / P Balance)
 
-Top candidates are selected and post-processed for balance
+Recruiter queries often contain both:
+- **Technical requirements** (e.g., Java, Python, SQL)
+- **Behavioral or soft-skill requirements** (e.g., collaboration, leadership)
 
-Final recommendations are returned via an API
+To address this, a domain detection heuristic is applied:
+- If both technical and soft-skill signals are detected, the final recommendation list is balanced between:
+  - Knowledge/Skill (K) tests
+  - Personality/Behavior (P) tests
 
-This modular pipeline ensures clarity, maintainability, and extensibility.
+This ensures the recommendations better reflect real hiring needs rather than relying purely on lexical similarity.
 
-4. Domain Detection and Balancing Logic
+---
 
-An important requirement of the assignment is to ensure balanced recommendations when a query spans multiple competency domains.
+## 4. Evaluation Strategy
 
-To address this, the system performs lightweight domain detection by identifying whether the query relates to:
+### 4.1 Metric
 
-Technical skills (e.g., programming, software development, data skills)
+The system is evaluated using **Mean Recall@10**, as required.
 
-Behavioral or personality traits (e.g., communication, teamwork, leadership)
+For each query:
+- The top 10 recommended assessment URLs are compared against the ground-truth URLs
+- Recall is computed using **exact URL-level matching**
 
-If both domains are detected, the recommender intentionally balances the output by including assessments from both Knowledge & Skills and Personality & Behavior categories. This ensures that hiring managers receive a holistic set of assessments aligned with real-world hiring needs.
+### 4.2 URL Normalization
 
-5. API and Application Design
+During evaluation, URLs are normalized by:
+- Converting to lowercase
+- Removing trailing slashes
 
-The recommendation engine is exposed via a FastAPI backend with two endpoints:
+This avoids false negatives due to formatting differences.
 
-/health – Used to verify API availability
+---
 
-/recommend – Accepts a query and returns recommended assessments
+## 5. Results and Observations
 
-The API response strictly follows the format specified in the SHL assessment document.
+The TF-IDF baseline achieved a **low Mean Recall@10 (~0.02)**.
 
-A Streamlit-based frontend is built on top of the API to provide a simple and user-friendly interface. Users can enter a query and view the recommended assessments in a tabular format.
+This result is expected due to:
+- Long and generic job descriptions
+- Strict URL-level matching
+- The lexical nature of TF-IDF, which struggles with semantic similarity
+- A large and diverse set of relevant assessments per query
 
-6. Evaluation Strategy
+Despite the low recall value, the evaluation pipeline is correct and highlights the limitations of keyword-based retrieval on this dataset.
 
-To evaluate the effectiveness of the recommendation system, the provided labeled training dataset was used. The performance metric chosen was Mean Recall@10, as specified in the assignment.
+---
 
-For each query in the training set:
+## 6. Limitations
 
-The top 10 recommended assessments were retrieved
+- TF-IDF does not capture semantic similarity effectively for long job descriptions
+- Exact URL-level evaluation is very strict in a multi-label setting
+- Embedding-based semantic retrieval (e.g., sentence transformers) is expected to significantly improve recall but could not be fully deployed due to system constraints
 
-The overlap between predicted and ground-truth assessment URLs was computed
+---
 
-Although initial recall values were low due to the small dataset and strict URL-level matching, the evaluation pipeline demonstrates a correct and reproducible methodology. The focus of this step was on validating the retrieval logic and ensuring metric correctness rather than overfitting to the limited training data.
+## 7. Future Improvements
 
-7. Final Predictions
+- Replace TF-IDF with transformer-based sentence embeddings
+- Apply hybrid retrieval (semantic retrieval + rule-based re-ranking)
+- Incorporate additional constraints such as duration and seniority
+- Use relaxed or category-level evaluation for qualitative analysis
 
-After finalizing the system, predictions were generated for the unlabeled test dataset. The results were exported in the exact CSV format required by SHL, with each query mapped to its recommended assessment URLs.
+---
 
-8. Conclusion
+## 8. Conclusion
 
-This project demonstrates an end-to-end assessment recommendation system that satisfies all requirements outlined in the SHL assignment. It includes data scraping, semantic relevance modeling, balanced recommendation logic, evaluation, API exposure, and a user-facing application. The solution is modular, explainable, and designed to be easily extended or improved in future iterations.
+This project demonstrates a complete, end-to-end assessment recommendation pipeline:
+- Data preparation
+- Vector-based retrieval
+- Domain-aware re-ranking
+- Proper evaluation and analysis
+
+The system is robust, reproducible, and aligns with SHL’s problem requirements while clearly documenting its limitations and improvement opportunities.

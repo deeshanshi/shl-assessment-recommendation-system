@@ -19,19 +19,31 @@ if st.button("Get Recommendations"):
         st.warning("Please enter a query.")
     else:
         with st.spinner("Fetching recommendations..."):
-            response = requests.post(
-                API_URL,
-                json={"query": query, "k": k}
-            )
+            try:
+                response = requests.post(
+                    API_URL,
+                    json={"query": query, "k": k},
+                    timeout=10
+                )
 
-            if response.status_code == 200:
-                data = response.json()["recommendations"]
+                if response.status_code == 200:
+                    data = response.json().get("recommendations", [])
 
-                st.success("Recommended Assessments:")
-                for i, rec in enumerate(data, start=1):
-                    st.markdown(
-                        f"**{i}. {rec['name']}**  \n"
-                        f"[Open Assessment]({rec['url']})"
-                    )
-            else:
-                st.error("API error. Please try again.")
+                    if not data:
+                        st.info("No recommendations found.")
+                    else:
+                        st.success("Recommended Assessments:")
+                        for i, rec in enumerate(data, start=1):
+                            st.markdown(
+                                f"**{i}. {rec.get('name','')}**  \n"
+                                f"[Open Assessment]({rec.get('url','')})"
+                            )
+                else:
+                    st.error(f"API error ({response.status_code}). Please try again.")
+
+            except requests.exceptions.ConnectionError:
+                st.error("Cannot connect to API. Please make sure the backend is running.")
+            except requests.exceptions.Timeout:
+                st.error("Request timed out. Please try again.")
+            except Exception as e:
+                st.error(f"Unexpected error: {e}")

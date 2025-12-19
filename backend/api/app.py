@@ -5,7 +5,6 @@ import pandas as pd
 import sys
 import os
 
-# allow backend imports
 sys.path.append(os.path.abspath("."))
 
 from backend.core.recommender import recommend_assessments
@@ -13,6 +12,9 @@ from backend.core.recommender import recommend_assessments
 app = FastAPI(title="SHL Assessment Recommendation API")
 
 DATA_PATH = "data/processed/shl_assessments.csv"
+
+# -------- Load catalog ONCE --------
+catalog_df = pd.read_csv(DATA_PATH)
 
 
 # ---------- Schemas (PDF Appendix-2 compliant) ----------
@@ -25,6 +27,11 @@ class RecommendRequest(BaseModel):
 class AssessmentResponse(BaseModel):
     name: str
     url: str
+    description: str
+    duration: int
+    remote_support: str
+    adaptive_support: str
+    test_type: List[str]
 
 
 class RecommendResponse(BaseModel):
@@ -41,17 +48,22 @@ def health():
 @app.post("/recommend", response_model=RecommendResponse)
 def recommend(req: RecommendRequest):
 
-    df = pd.read_csv(DATA_PATH)
-
     results = recommend_assessments(
         query=req.query,
-        df=df,
+        df=catalog_df,
         k=req.k
     )
 
-    response = [
-        {"name": r["name"], "url": r["url"]}
-        for r in results
-    ]
+    response = []
+    for r in results:
+        response.append({
+            "name": r.get("name", ""),
+            "url": r.get("url", ""),
+            "description": r.get("description", ""),
+            "duration": int(r.get("duration", 0)),
+            "remote_support": r.get("remote_support", "Yes"),
+            "adaptive_support": r.get("adaptive_support", "No"),
+            "test_type": r.get("test_type", [])
+        })
 
     return {"recommendations": response}
