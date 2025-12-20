@@ -120,6 +120,7 @@ These results highlight the need for semantic embeddings in future iterations.
 
 ## 📁 Project Structure
 
+```bash
 shl-assessment-recommendation-system/
 │
 ├── backend/
@@ -146,7 +147,6 @@ shl-assessment-recommendation-system/
 ├── requirements.txt              # Python dependencies
 ├── runtime.txt                   # Python runtime version (Render)
 └── README.md                     # Project documentation
-
 
 ---
 
