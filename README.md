@@ -1,180 +1,162 @@
 # SHL Assessment Recommendation System
 
-This project implements an intelligent assessment recommendation system for SHL Individual Test Solutions.  
-It accepts a natural language query or job description and returns the most relevant assessments by balancing technical and behavioral competencies.
+An end-to-end **Assessment Recommendation System** built as part of the SHL AI Intern assignment.  
+The system recommends relevant **SHL Individual Test Solutions** based on recruiter queries or job descriptions.
 
-The system is designed as an end-to-end solution including data scraping, recommendation logic, evaluation, API exposure, and a user-facing web application.
-
----
-
-## 🚀 Features
-
-- Scrapes SHL **Individual Test Solutions** (excluding pre-packaged solutions)
-- Intelligent recommendation based on query intent
-- Balanced results across:
-  - Knowledge & Skills assessments
-  - Personality & Behavioral assessments
-- FastAPI backend with SHL-compliant API responses
-- Streamlit frontend for easy interaction
-- Evaluation using **Mean Recall@10**
-- Production-ready setup with environment variables
+The project includes:
+- A vector-based recommendation engine
+- A FastAPI backend
+- A Streamlit frontend
+- Evaluation using Recall@K
+- Fully deployed, live system
 
 ---
 
-## 🧠 System Architecture
+## 🚀 Live Demo
 
-**Workflow:**
+### 🔹 Frontend (Streamlit)
+👉 https://shl-assessment-recommendation-system-noux4kphg2xa4g2zbdrxuk.streamlit.app/
 
-1. User provides a job description or query
-2. Query is analyzed for technical and behavioral intent
-3. Assessments are ranked using relevance scoring
-4. Balanced recommendations are selected
-5. Results are returned via API and displayed in UI
+### 🔹 Backend API (FastAPI – Render)
+- Health Check:  
+  👉 https://shl-assessment-recommendation-system-1-wcau.onrender.com/health
+- Recommendation Endpoint:  
+  👉 https://shl-assessment-recommendation-system-1-wcau.onrender.com/recommend
+
+---
+
+## 🧠 Problem Statement
+
+Given a natural language hiring query or job description, recommend **up to 10 relevant SHL assessments** that best match:
+- Technical skill requirements
+- Behavioral and personality traits
+- Hiring constraints
+
+This is a **multi-label recommendation problem**, as each query may map to multiple valid assessments.
+
+---
+
+## 🏗️ System Architecture
+
+The following diagram illustrates the end-to-end architecture of the SHL Assessment Recommendation System, covering data processing, backend API flow, and user interface.
+
+![System Architecture](assets/system_architecture.png)
+
+User (Browser)
+|
+v
+Streamlit Frontend (UI)
+|
+v
+FastAPI Backend (Render)
+|
+v
+TF-IDF Vector Recommender
+|
+v
+SHL Assessment Catalog (CSV)
+
+
+---
+
+## ⚙️ Technology Stack
+
+- **Backend**: FastAPI
+- **Frontend**: Streamlit
+- **ML / NLP**: TF-IDF + Cosine Similarity
+- **Evaluation**: Recall@10
+- **Deployment**:
+  - Backend: Render
+  - Frontend: Streamlit Cloud
+- **Language**: Python 3.10
+
+---
+
+## 🔍 Recommendation Approach
+
+### 1. Text Representation
+Each SHL assessment is represented using:
+- Assessment name
+- Description
+- Test type (Knowledge / Personality)
+
+TF-IDF vectorization is applied to convert text into numerical vectors.
+
+---
+
+### 2. Similarity Search
+- Recruiter query is vectorized using the same TF-IDF model
+- Cosine similarity is computed against all assessments
+- Top-K most similar assessments are retrieved
+
+---
+
+### 3. Domain-Aware Re-ranking
+If a query contains both:
+- Technical signals (e.g., Java, Python, SQL)
+- Behavioral signals (e.g., collaboration, leadership)
+
+The system balances recommendations between:
+- Knowledge/Skill tests
+- Personality/Behavior tests
+
+---
+
+## 📊 Evaluation
+
+- Metric: **Mean Recall@10**
+- Dataset: SHL-provided labeled train set
+- URL normalization is applied during evaluation to avoid formatting mismatches
+
+### Observation:
+The TF-IDF baseline achieves a low Recall@10 due to:
+- Long and generic job descriptions
+- Strict URL-level matching
+- Lexical (non-semantic) retrieval limitations
+
+These results highlight the need for semantic embeddings in future iterations.
 
 ---
 
 ## 📁 Project Structure
 
-shl-assessment-recommendation/
+shl-assessment-recommendation-system/
 │
 ├── backend/
-│ ├── api/ # FastAPI endpoints
-│ ├── core/ # Recommendation logic
-│ └── utils/
+│ ├── api/
+│ │ └── app.py
+│ └── core/
+│ └── recommender.py
 │
-├── frontend/ # Streamlit application
+├── frontend/
+│ └── app.py
+│
+├── experiments/
+│ ├── evaluate.py
+│ └── generate_submission.py
 │
 ├── data/
-│ ├── processed/ # SHL assessment catalog
-│ └── evaluation/ # Train/Test datasets and outputs
+│ ├── processed/
+│ └── evaluation/
 │
-├── experiments/ # Evaluation & submission scripts
+├── docs/
+│ └── approach.md
 │
-├── approach.md # Detailed approach document
-├── README.md
 ├── requirements.txt
-└── .gitignore
+├── runtime.txt
+└── README.md
 
-yaml
-Copy code
 
 ---
 
-## 🔧 Setup Instructions (Local)
+## ▶️ Running Locally
 
-### 1️⃣ Create virtual environment
+### 1️⃣ Install dependencies
 ```bash
-python -m venv venv
-venv\Scripts\activate
-2️⃣ Install dependencies
-bash
-Copy code
 pip install -r requirements.txt
-▶️ Running the Application (Local)
-Start Backend (FastAPI)
-bash
-Copy code
+
+2️⃣ Start backend
 uvicorn backend.api.app:app --reload
-Backend will be available at:
 
-cpp
-Copy code
-http://127.0.0.1:8000
-Health check:
-
-bash
-Copy code
-GET /health
-Start Frontend (Streamlit)
-bash
-Copy code
+3️⃣ Start frontend
 streamlit run frontend/app.py
-Frontend will be available at:
-
-arduino
-Copy code
-http://localhost:8501
-🔌 API Endpoints
-Health Check
-bash
-Copy code
-GET /health
-Response:
-
-json
-Copy code
-{
-  "status": "healthy"
-}
-Recommendation Endpoint
-bash
-Copy code
-POST /recommend
-Request:
-
-json
-Copy code
-{
-  "query": "Hiring a Java developer with good communication skills"
-}
-Response:
-
-json
-Copy code
-{
-  "recommended_assessments": [
-    {
-      "name": "...",
-      "url": "...",
-      "description": "...",
-      "duration": 45,
-      "remote_support": "Yes",
-      "adaptive_support": "Yes",
-      "test_type": ["Knowledge & Skills"]
-    }
-  ]
-}
-📊 Evaluation
-Metric used: Mean Recall@10
-
-Evaluated using provided labeled training dataset
-
-Evaluation script located in:
-
-bash
-Copy code
-experiments/evaluate.py
-Run:
-
-bash
-Copy code
-python experiments/evaluate.py
-📄 Submission Artifacts
-API URL (FastAPI)
-
-Web application URL (Streamlit)
-
-GitHub repository
-
-approach.md (2-page approach document)
-
-submission.csv (final predictions on test set)
-
-🛠️ Technology Stack
-Python
-
-FastAPI
-
-Streamlit
-
-Pandas
-
-scikit-learn
-
-python-dotenv
-
- Author
-Deeshanshi Sahu
-B.Tech Computer Science
-SHL Assessment – Generative AI Assignment
-
