@@ -43,18 +43,18 @@ The following diagram illustrates the end-to-end architecture of the SHL Assessm
 ![System Architecture](docs/system_architecture.png)
 
 User (Browser)
-|
-v
+     |
+     v
 Streamlit Frontend (UI)
-|
-v
-FastAPI Backend (Render)
-|
-v
-TF-IDF Vector Recommender
-|
-v
-SHL Assessment Catalog (CSV)
+     |
+     v
+FastAPI Backend (Hosted on Render)
+     |
+     v
+TF-IDF Vector Recommender Engine
+     |
+     v
+SHL Assessment Catalog (CSV Dataset)
 
 
 ---
@@ -123,28 +123,29 @@ These results highlight the need for semantic embeddings in future iterations.
 shl-assessment-recommendation-system/
 │
 ├── backend/
-│ ├── api/
-│ │ └── app.py
-│ └── core/
-│ └── recommender.py
+│   ├── api/
+│   │   └── app.py              # FastAPI application entry point
+│   │
+│   └── core/
+│       └── recommender.py      # TF-IDF recommendation logic
 │
 ├── frontend/
-│ └── app.py
+│   └── app.py                  # Streamlit frontend UI
 │
 ├── experiments/
-│ ├── evaluate.py
-│ └── generate_submission.py
+│   ├── evaluate.py             # Model evaluation script
+│   └── generate_submission.py  # Submission file generator
 │
 ├── data/
-│ ├── processed/
-│ └── evaluation/
+│   ├── processed/              # Cleaned SHL assessment data
+│   └── evaluation/             # Train / test datasets
 │
 ├── docs/
-│ └── approach.md
+│   └── approach.md             # Solution approach & methodology
 │
-├── requirements.txt
-├── runtime.txt
-└── README.md
+├── requirements.txt            # Python dependencies
+├── runtime.txt                 # Python runtime version (Render)
+└── README.md                   # Project documentation
 
 
 ---
