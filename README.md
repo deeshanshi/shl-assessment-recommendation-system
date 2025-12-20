@@ -42,6 +42,9 @@ The following diagram illustrates the end-to-end architecture of the SHL Assessm
 
 ![System Architecture](docs/system_architecture.png)
 
+## 🧠 System Architecture Flow
+
+```text
 User (Browser)
      |
      v
@@ -55,7 +58,6 @@ TF-IDF Vector Recommender Engine
      |
      v
 SHL Assessment Catalog (CSV Dataset)
-
 
 ---
 
