@@ -124,28 +124,28 @@ shl-assessment-recommendation-system/
 │
 ├── backend/
 │   ├── api/
-│   │   └── app.py              # FastAPI application entry point
+│   │   └── app.py                # FastAPI application entry point
 │   │
 │   └── core/
-│       └── recommender.py      # TF-IDF recommendation logic
+│       └── recommender.py        # TF-IDF recommendation logic
 │
 ├── frontend/
-│   └── app.py                  # Streamlit frontend UI
+│   └── app.py                    # Streamlit frontend UI
 │
 ├── experiments/
-│   ├── evaluate.py             # Model evaluation script
-│   └── generate_submission.py  # Submission file generator
+│   ├── evaluate.py               # Model evaluation script
+│   └── generate_submission.py    # Submission file generator
 │
 ├── data/
-│   ├── processed/              # Cleaned SHL assessment data
-│   └── evaluation/             # Train / test datasets
+│   ├── processed/                # Cleaned SHL assessment data
+│   └── evaluation/               # Train / test datasets
 │
 ├── docs/
-│   └── approach.md             # Solution approach & methodology
+│   └── approach.md               # Solution approach & methodology
 │
-├── requirements.txt            # Python dependencies
-├── runtime.txt                 # Python runtime version (Render)
-└── README.md                   # Project documentation
+├── requirements.txt              # Python dependencies
+├── runtime.txt                   # Python runtime version (Render)
+└── README.md                     # Project documentation
 
 
 ---
