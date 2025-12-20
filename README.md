@@ -40,7 +40,7 @@ This is a **multi-label recommendation problem**, as each query may map to multi
 
 The following diagram illustrates the end-to-end architecture of the SHL Assessment Recommendation System, covering data processing, backend API flow, and user interface.
 
-![System Architecture](assets/system_architecture.png)
+![System Architecture](doc/system_architecture.png)
 
 User (Browser)
 |
